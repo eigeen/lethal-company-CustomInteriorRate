@@ -2,7 +2,7 @@
     "name": "CustomInteriorRate",
     "version_number": "1.0.0",
     "description": "Customize the probability of generating every interior types on each map.",
-    "website_url": "https://thunderstore.io/c/lethal-company/p/eigeen/CustomInteriorRate",
+    "website_url": "https://github.com/eigeen/lethal-company-CustomInteriorRate",
     "dependencies": [
         "BepInEx-BepInExPack-5.4.2100"
     ]
