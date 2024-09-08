@@ -80,25 +80,54 @@ namespace Plugin
             // 去除自定义配置包含的不可能生效的结构类型
             var originalMapIds = new HashSet<int>(InteriorWeightDatas.Select(it => it.Id));
             List<InteriorConfig> newInteriorConfigs = InteriorConfigs.Where(it => originalMapIds.Contains(it.Id)).ToList();
-            // 先处理固定概率配置值
+
+            // 未配置的原始值
             double fixedRateSum = newInteriorConfigs.Sum(it => it.Rate);
             var configMapIds = new HashSet<int>(newInteriorConfigs.Select(it => it.Id));
-            newInteriorConfigs.ForEach(it => combined.Add(it));
-            // 再补全原始值
             var diff = new HashSet<int>(originalMapIds);
             diff.ExceptWith(configMapIds);
             List<InteriorWeightData> remainOriginalWeightData = InteriorWeightDatas.Where(it => diff.Contains(it.Id)).ToList();
-            // 权重转绝对概率
-            double[] rates = ZoomRatesInto(remainOriginalWeightData.Select(it => (double)it.Weight).ToArray(), 1.0 - fixedRateSum);
-            for (int i = 0; i < rates.Length; i++)
+
+            // 配置文件满映射情况，直接对配置数据处理
+            if (remainOriginalWeightData.Count == 0 && newInteriorConfigs.Count > 0)
             {
-                combined.Add(new InteriorConfig
+                if (newInteriorConfigs.Sum(it => it.Rate) != 1.0)
                 {
-                    Id = remainOriginalWeightData[i].Id,
-                    Rate = rates[i],
-                });
+                    Plugin.Logger.LogWarning($@"Sum of configured interior rates not equal to 1.0, rebalancing...");
+                }
+                double[] rates = ZoomRatesInto(newInteriorConfigs.Select(it => (double)it.Rate).ToArray(), 1.0);
+                for (int i = 0; i < rates.Length; i++)
+                {
+                    combined.Add(new InteriorConfig
+                    {
+                        Id = newInteriorConfigs[i].Id,
+                        Rate = rates[i],
+                    });
+                }
+                Plugin.Logger.LogInfo($@"Proxied interior rates: [{String.Join(", ", combined)}]");
+                combinedConfigs[MapName] = combined;
+                return combined;
             }
 
+            // 处理固定概率配置值
+            newInteriorConfigs.ForEach(it => combined.Add(it));
+
+            // 原始值补全
+            if (remainOriginalWeightData.Count > 0)
+            {
+                // 权重转绝对概率
+                double[] rates = ZoomRatesInto(remainOriginalWeightData.Select(it => (double)it.Weight).ToArray(), 1.0 - fixedRateSum);
+                for (int i = 0; i < rates.Length; i++)
+                {
+                    combined.Add(new InteriorConfig
+                    {
+                        Id = remainOriginalWeightData[i].Id,
+                        Rate = rates[i],
+                    });
+                }
+            }
+
+            Plugin.Logger.LogInfo($@"Proxied interior rates: [{String.Join(", ", combined)}]");
             combinedConfigs[MapName] = combined;
             return combined;
         }

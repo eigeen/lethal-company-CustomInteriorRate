@@ -28,5 +28,10 @@ namespace Plugin.Configuration
             }
         }
         public double Rate { get; set; }
+
+        public override string ToString()
+        {
+            return $"InteriorConfig{{ Id = {Id}, Name = {Name}, Rate = {Rate} }}";
+        }
     }
 }

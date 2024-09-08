@@ -34,7 +34,16 @@ namespace Plugin.Patches
             };
 
             // 计算需要生成的目标结构
-            var targetId = combinedMap.SampleOneInteriorId();
+            int? targetId;
+            try
+            {
+                targetId = combinedMap.SampleOneInteriorId();
+            }
+            catch (Exception ex)
+            {
+                Plugin.Logger.LogError($"Accidental error: Failed to get target interior id: {ex}");
+                return;
+            }
             if (targetId == null)
             {
                 Plugin.Logger.LogWarning("Got null target interior id, ignored. Maybe set empty configuration values?");
@@ -60,9 +69,9 @@ namespace Plugin.Patches
 
             // 生成目标不匹配，开始尝试重生成
             Plugin.Logger.LogInfo($"Unmatching interior type. Try to regenerate.");
-            // 可能没有作用，保险起见
-            roundManager.hasInitializedLevelRandomSeed = false;
-            roundManager.InitializeRandomNumberGenerators();
+            //// 可能没有作用，保险起见
+            //roundManager.hasInitializedLevelRandomSeed = false;
+            //roundManager.InitializeRandomNumberGenerators();
 
             for (int i = 0; i < 2000; i++)
             {
@@ -123,7 +132,7 @@ namespace Plugin.Patches
             List<int> list = roundManager.currentLevel.dungeonFlowTypes
                 .Select(flowType => flowType.rarity)
                 .ToList();
-            Plugin.Logger.LogDebug($"List: {String.Join(", ", list)}");
+            Plugin.Logger.LogDebug($"Original List: {String.Join(", ", list)}");
             int randomWeightedIndex = roundManager.GetRandomWeightedIndex(list.ToArray(), levelRandom);
             Plugin.Logger.LogDebug($"randomWeightedIndex: {randomWeightedIndex}");
             int interiorId = roundManager.currentLevel.dungeonFlowTypes[randomWeightedIndex].id;
