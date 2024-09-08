@@ -1,6 +1,6 @@
 {
     "name": "CustomInteriorRate",
-    "version_number": "1.0.0",
+    "version_number": "1.0.1",
     "description": "Customize the probability of generating every interior types on each map.",
     "website_url": "https://github.com/eigeen/lethal-company-CustomInteriorRate",
     "dependencies": [

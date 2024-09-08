@@ -1,4 +1,4 @@
-# CustomInteriorRate v1.0.0
+# CustomInteriorRate v1.0.1
 
 Customize the probability of generating every interior types on each map.
 
